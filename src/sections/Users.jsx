@@ -1,9 +1,63 @@
 import { useEffect, useState } from "react";
 import { api } from "../api/axios";
 import { User, Mail, Calendar } from "lucide-react";
+import { toast } from "react-toastify";
 
 export default function Users() {
   const [users, setUsers] = useState([]);
+  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [loadingUserId, setLoadingUserId] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleGiveFreeSlots = async (userId, email) => {
+    setLoadingUserId(userId);
+    try {
+      const token = localStorage.getItem("accessToken");
+      await api.post(
+        "/admin/give-free-magnets",
+        { userId, count: 5 },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      toast.success(`Gave 5 free slots to ${email}`);
+    } catch (err) {
+      toast.error("Failed to add free slots");
+    } finally {
+      setLoadingUserId(null);
+    }
+  };
+
+  const handleCreateUser = async () => {
+    if (!form.name || !form.email || !form.password) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("accessToken");
+
+      const res = await api.post(
+        "/admin/create-user-with-slots",
+        { ...form, slots: 5 },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.success(res.data.message || "User created successfully");
+
+      // refresh user list after adding
+      const refreshed = await api.get("/admin/users", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUsers(refreshed.data.users);
+      setForm({ name: "", email: "", password: "" });
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to create user");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -29,6 +83,48 @@ export default function Users() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
         <div>
+          <div className="bg-gray-900/70 border border-gray-800 rounded-xl p-6 mb-8 shadow-md">
+            <h2 className="text-lg font-semibold text-white mb-4 lead-text">
+              Add New User
+            </h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+              <input
+                type="text"
+                placeholder="Full Name"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                className="p-3 rounded-md bg-gray-800 text-white border border-gray-700 focus:ring-2 focus:ring-pink-500"
+              />
+
+              <input
+                type="email"
+                placeholder="Email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                className="p-3 rounded-md bg-gray-800 text-white border border-gray-700 focus:ring-2 focus:ring-blue-500"
+              />
+
+              <input
+                type="password"
+                placeholder="Temporary Password"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                className="p-3 rounded-md bg-gray-800 text-white border border-gray-700 focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <button
+              onClick={handleCreateUser}
+              disabled={loading}
+              className={`bg-red-600 hover:bg-headerGreen text-white px-6 py-2 rounded-lg font-semibold shadow-md transition-all duration-200 ${
+                loading ? "opacity-50 cursor-not-allowed" : "hover:scale-105"
+              }`}
+            >
+              {loading ? "Creating User..." : "Create User + 5 Free Slots"}
+            </button>
+          </div>
+
           <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight lead-text">
             User Directory
           </h1>
@@ -47,6 +143,7 @@ export default function Users() {
               <th className="px-6 py-4 text-left w-1/3">Email</th>
               <th className="px-6 py-4 text-left w-1/6">Role</th>
               <th className="px-6 py-4 text-left w-1/4">Joined</th>
+              <th className="px-6 py-4 text-left w-1/6">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-800">
@@ -93,6 +190,19 @@ export default function Users() {
                       })
                     : "—"}
                 </td>
+                <td className="px-6 py-4 text-right">
+                  <button
+                    onClick={() => handleGiveFreeSlots(u.id, u.email)}
+                    disabled={loadingUserId === u.id}
+                    className={`bg-red-600 hover:bg-headerGreen text-white text-xs font-semibold px-3 py-1 rounded-lg shadow-md transition-colors duration-200 ${
+                      loadingUserId === u.id
+                        ? "opacity-50 cursor-not-allowed"
+                        : "hover:scale-105"
+                    }`}
+                  >
+                    {loadingUserId === u.id ? "Processing..." : "+5 Free Slots"}
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -132,7 +242,6 @@ export default function Users() {
               >
                 {u.role}
               </span>
-              
 
               <div className="flex items-center gap-1 text-gray-500 lead-text">
                 <Calendar size={14} />
@@ -143,6 +252,19 @@ export default function Users() {
                       year: "numeric",
                     })
                   : "—"}
+              </div>
+              <div className="pt-3">
+                <button
+                  onClick={() => handleGiveFreeSlots(u.id, u.email)}
+                  disabled={loadingUserId === u.id}
+                  className={`bg-red-600 hover:bg-headerGreen text-white text-xs font-semibold px-3 py-1 rounded-lg shadow-md transition-colors duration-200 ${
+                    loadingUserId === u.id
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:scale-105"
+                  }`}
+                >
+                  {loadingUserId === u.id ? "Processing..." : "+5 Free Slots"}
+                </button>
               </div>
             </div>
           </div>
