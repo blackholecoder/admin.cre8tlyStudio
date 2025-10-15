@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { Home, Users, FileText, Settings, Menu, X, Mail} from "lucide-react";
+import { Home, Users, FileText, Settings, Menu, X, BookOpenText} from "lucide-react";
 import { headerLogo } from "../assets";
 
 
@@ -9,8 +9,8 @@ const navItems = [
   { name: "Dashboard", to: "/", icon: <Home size={20} /> },
   { name: "Users", to: "/users", icon: <Users size={20} /> },
   { name: "Reports", to: "/reports", icon: <FileText size={20} /> },
-  { name: "Leads", to: "/leads", icon: <Mail size={20} /> },
   { name: "Settings", to: "/settings", icon: <Settings size={20} /> },
+  { name: "Ebooks", to: "/ebooks", icon: <BookOpenText size={20} /> },
 ];
 
 export default function Sidebar() {

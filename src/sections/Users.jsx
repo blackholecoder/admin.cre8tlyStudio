@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../api/axios";
-import { User, Mail, Calendar } from "lucide-react";
+import { User, Mail, Calendar, Trash2  } from "lucide-react";
 import { toast } from "react-toastify";
 
 export default function Users() {
@@ -23,6 +23,23 @@ export default function Users() {
       toast.success(`Gave 5 free slots to ${email}`);
     } catch (err) {
       toast.error("Failed to add free slots");
+    } finally {
+      setLoadingUserId(null);
+    }
+  };
+
+  const handleGiveFreeBookSlots = async (userId, email) => {
+    setLoadingUserId(userId);
+    try {
+      const token = localStorage.getItem("accessToken");
+      await api.post(
+        "/admin/give-free-books",
+        { userId, count: 1 },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success(`Gave 1 free book slot to ${email}`);
+    } catch (err) {
+      toast.error("Failed to add book slots");
     } finally {
       setLoadingUserId(null);
     }
@@ -58,6 +75,57 @@ export default function Users() {
       setLoading(false);
     }
   };
+
+const handleDeleteUser = (userId) => {
+  toast.info(
+    <div className="text-center">
+      <p className="font-medium text-gray-200 mb-2">
+        Are you sure you want to permanently delete this user?
+      </p>
+      <div className="flex justify-center gap-3 mt-2">
+        <button
+          onClick={async () => {
+            toast.dismiss();
+            try {
+              const token = localStorage.getItem("accessToken");
+
+              await api.delete(`/admin/users/users/${userId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+
+              setUsers((prev) => prev.filter((u) => u.id !== userId));
+              toast.success("✅ User deleted successfully");
+            } catch (err) {
+              console.error("Delete error:", err);
+              toast.error(
+                err.response?.data?.message || "❌ Failed to delete user"
+              );
+            }
+          }}
+          className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs font-semibold transition"
+        >
+          Delete
+        </button>
+        <button
+          onClick={() => toast.dismiss()}
+          className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded text-xs font-semibold transition"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>,
+    {
+      position: "top-center",
+      autoClose: false,
+      closeOnClick: false,
+      draggable: false,
+      closeButton: false,
+      hideProgressBar: true,
+      className: "bg-gray-900 border border-gray-700 shadow-lg",
+    }
+  );
+};
+
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -191,17 +259,42 @@ export default function Users() {
                     : "—"}
                 </td>
                 <td className="px-6 py-4 text-right">
-                  <button
-                    onClick={() => handleGiveFreeSlots(u.id, u.email)}
-                    disabled={loadingUserId === u.id}
-                    className={`bg-red-600 hover:bg-headerGreen text-white text-xs font-semibold px-3 py-1 rounded-lg shadow-md transition-colors duration-200 ${
-                      loadingUserId === u.id
-                        ? "opacity-50 cursor-not-allowed"
-                        : "hover:scale-105"
-                    }`}
-                  >
-                    {loadingUserId === u.id ? "Processing..." : "+5 Free Slots"}
-                  </button>
+                  <div className="flex items-center justify-end space-x-2">
+                    <button
+                      onClick={() => handleGiveFreeSlots(u.id, u.email)}
+                      disabled={loadingUserId === u.id}
+                      className={`bg-red-600 hover:bg-headerGreen text-white text-xs font-semibold px-3 py-1 rounded-lg shadow-md transition-all duration-200 ${
+                        loadingUserId === u.id
+                          ? "opacity-50 cursor-not-allowed"
+                          : "hover:scale-105"
+                      }`}
+                    >
+                      {loadingUserId === u.id
+                        ? "Processing..."
+                        : "Slots"}
+                    </button>
+
+                    <button
+                      onClick={() => handleGiveFreeBookSlots(u.id, u.email)}
+                      disabled={loadingUserId === u.id}
+                      className={`bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-1 rounded-lg shadow-md transition-all duration-200 ${
+                        loadingUserId === u.id
+                          ? "opacity-50 cursor-not-allowed"
+                          : "hover:scale-105"
+                      }`}
+                    >
+                      {loadingUserId === u.id
+                        ? "Processing..."
+                        : "Books"}
+                    </button>
+                    <button
+      onClick={() => handleDeleteUser(u.id)}
+      className="p-2 bg-gray-800 hover:bg-red-600 text-red-400 hover:text-white rounded-lg transition-all duration-200"
+      title="Delete User"
+    >
+      <Trash2 size={16} />
+    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -253,17 +346,29 @@ export default function Users() {
                     })
                   : "—"}
               </div>
-              <div className="pt-3">
+              <div className="pt-3 flex items-center justify-end gap-2 flex-wrap">
                 <button
                   onClick={() => handleGiveFreeSlots(u.id, u.email)}
                   disabled={loadingUserId === u.id}
-                  className={`bg-red-600 hover:bg-headerGreen text-white text-xs font-semibold px-3 py-1 rounded-lg shadow-md transition-colors duration-200 ${
+                  className={`bg-red-600 hover:bg-headerGreen text-white text-xs font-semibold px-3 py-1 rounded-lg shadow-md transition-all duration-200 ${
                     loadingUserId === u.id
                       ? "opacity-50 cursor-not-allowed"
                       : "hover:scale-105"
                   }`}
                 >
-                  {loadingUserId === u.id ? "Processing..." : "+5 Free Slots"}
+                  {loadingUserId === u.id ? "Processing..." : "5 Slots"}
+                </button>
+
+                <button
+                  onClick={() => handleGiveFreeBookSlots(u.id, u.email)}
+                  disabled={loadingUserId === u.id}
+                  className={`bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-1 rounded-lg shadow-md transition-all duration-200 ${
+                    loadingUserId === u.id
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:scale-105"
+                  }`}
+                >
+                  {loadingUserId === u.id ? "Processing..." : "1 Book"}
                 </button>
               </div>
             </div>
