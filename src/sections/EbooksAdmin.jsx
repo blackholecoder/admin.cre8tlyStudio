@@ -14,7 +14,6 @@ export default function EbooksAdmin() {
     title: "",
     description: "",
     price: "",
-    color: "purple",
     imageBase64: "",
     productType: "",
   });
@@ -68,7 +67,6 @@ export default function EbooksAdmin() {
         title: "",
         description: "",
         price: "",
-        color: "purple",
         imageBase64: "",
         productType: "",
       });
@@ -131,15 +129,6 @@ export default function EbooksAdmin() {
             onChange={(e) => setForm({ ...form, price: e.target.value })}
             className="p-3 rounded-md bg-gray-800 text-white border border-gray-700 focus:ring-2 focus:ring-blue-500"
           />
-          <select
-            value={form.color}
-            onChange={(e) => setForm({ ...form, color: e.target.value })}
-            className="p-3 rounded-md bg-gray-800 text-white border border-gray-700"
-          >
-            <option value="purple">Purple</option>
-            <option value="green">Green</option>
-            <option value="blue">Blue</option>
-          </select>
         </div>
 
         <textarea
@@ -189,8 +178,6 @@ export default function EbooksAdmin() {
         deletingId={deletingId}
       />
 
-      {/* The table and mobile view remain unchanged */}
-      {/* (your previous responsive table + mobile grid code stays exactly the same) */}
     </div>
   );
 }
