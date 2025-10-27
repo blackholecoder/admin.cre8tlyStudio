@@ -14,6 +14,7 @@ import Reports from "./sections/Reports";
 import Login from "./auth/Login";
 import Settings from "./sections/Settings";
 import EbooksAdmin from "./sections/EbooksAdmin";
+import AdminMessages from "./sections/MessageBoard";
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem("accessToken");
@@ -46,6 +47,7 @@ export default function App() {
                       <Route path="/" element={<Dashboard />} />
                       <Route path="/users" element={<Users />} />
                       <Route path="/reports" element={<Reports />} />
+                      <Route path="/admin-messages" element={<AdminMessages />} />
                       <Route path="/settings" element={<Settings />} />
                       <Route path="/ebooks" element={<EbooksAdmin />} />
                     </Routes>
