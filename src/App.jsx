@@ -5,6 +5,7 @@ import {
   Routes,
   Route,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 import Sidebar from "./components/SideBar";
 import Header from "./components/Header";
@@ -15,25 +16,52 @@ import Login from "./auth/Login";
 import Settings from "./sections/Settings";
 import EbooksAdmin from "./sections/EbooksAdmin";
 import AdminMessages from "./sections/MessageBoard";
+import FreeTools from "./sections/FreeTools";
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem("accessToken");
   const isLoginPage = window.location.pathname === "/login";
-  // ✅ Allow login + 2FA to continue even without a token
+
   if (!token && !isLoginPage) {
     return <Navigate to="/login" replace />;
   }
 
   return children;
 }
-export default function App() {
-  const token = localStorage.getItem("accessToken");
 
-  // Hide sidebar + header on the login page
+function ProtectedRoute({ children, allowedRoles = [] }) {
+  const token = localStorage.getItem("accessToken");
+  const role = localStorage.getItem("role");
+  const location = useLocation();
+
+  if (!token) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // If no specific role restriction, allow all logged-in users
+  if (allowedRoles.length === 0) {
+    return children;
+  }
+
+  // 🚫 If role not allowed, redirect to their proper home
+  if (!allowedRoles.includes(role)) {
+    if (role === "marketer") {
+      return <Navigate to="/free-tools" replace />;
+    } else {
+      return <Navigate to="/" replace />;
+    }
+  }
+
+  return children;
+}
+
+
+export default function App() {
   return (
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
+
         <Route
           path="/*"
           element={
@@ -45,11 +73,58 @@ export default function App() {
                   <main className="flex-1 p-6 bg-gray-900 mt-14 md:mt-0">
                     <Routes>
                       <Route path="/" element={<Dashboard />} />
-                      <Route path="/users" element={<Users />} />
-                      <Route path="/reports" element={<Reports />} />
-                      <Route path="/admin-messages" element={<AdminMessages />} />
-                      <Route path="/settings" element={<Settings />} />
-                      <Route path="/ebooks" element={<EbooksAdmin />} />
+
+                      {/* 🔒 Admin-only routes */}
+                      <Route
+                        path="/users"
+                        element={
+                          <ProtectedRoute allowedRoles={["admin"]}>
+                            <Users />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/reports"
+                        element={
+                          <ProtectedRoute allowedRoles={["admin"]}>
+                            <Reports />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/admin-messages"
+                        element={
+                          <ProtectedRoute allowedRoles={["admin"]}>
+                            <AdminMessages />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/ebooks"
+                        element={
+                          <ProtectedRoute allowedRoles={["admin"]}>
+                            <EbooksAdmin />
+                          </ProtectedRoute>
+                        }
+                      />
+
+                      {/* ✅ Shared routes */}
+                      <Route
+                        path="/settings"
+                        element={
+                          <ProtectedRoute allowedRoles={["admin", "marketer"]}>
+                            <Settings />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/digital-assets"
+                        element={
+                          <ProtectedRoute allowedRoles={["admin", "marketer"]}>
+                            <FreeTools />
+                          </ProtectedRoute>
+                        }
+                      />
                     </Routes>
                   </main>
                 </div>
@@ -58,6 +133,7 @@ export default function App() {
           }
         />
       </Routes>
+
       <ToastContainer
         position="top-right"
         autoClose={3000}

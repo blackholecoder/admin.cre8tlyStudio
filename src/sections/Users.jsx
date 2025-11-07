@@ -15,12 +15,12 @@ export default function Users() {
       const token = localStorage.getItem("accessToken");
       await api.post(
         "/admin/give-free-magnets",
-        { userId, count: 5 },
+        { userId, count: 1 },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      toast.success(`Gave 5 free slots to ${email}`);
+      toast.success(`Gave 1 free slot to ${email}`);
     } catch (err) {
       toast.error("Failed to add free slots");
     } finally {

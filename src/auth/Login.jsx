@@ -17,64 +17,77 @@ export default function Login() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-  console.log("🧭 Stage:", stage);
-}, [stage]);
+    console.log("🧭 Stage:", stage);
+  }, [stage]);
 
   // ✅ Handle first login step
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-    setLoadingText("Signing in...");
-
-    try {
-      const res = await api.post("/auth/admin/login", { email, password });
-
-      if (res.data.twofaRequired) {
-        setStage("2fa");
-        setTempToken(res.data.twofaToken);
-      } else {
-        localStorage.setItem("accessToken", res.data.accessToken);
-        navigate("/");
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || "Invalid login credentials");
-      toast.error("Invalid login");
-    } finally {
-      setLoading(false);
-      setLoadingText("");
-    }
-  };
-
-  // ✅ Handle 2FA verification
-  const handleVerify2FA = async (e) => {
-  e.preventDefault(); // ✅ prevent page reload
+ const handleLogin = async (e) => {
+  e.preventDefault();
+  setError("");
+  setLoading(true);
+  setLoadingText("Signing in...");
 
   try {
-    const res = await api.post("/auth/admin/verify-login-2fa", {
-      token: twofaCode,
-      twofaToken: tempToken,
-    });
+    const res = await api.post("/auth/admin/login", { email, password });
 
-    console.log("✅ 2FA verify response:", res.data);
+    if (res.data.twofaRequired) {
+      setStage("2fa");
+      setTempToken(res.data.twofaToken);
+      return;
+    }
 
-    if (res.data.accessToken) {
-      localStorage.setItem("accessToken", res.data.accessToken);
-      toast.success("2FA verified successfully!");
-      setTimeout(() => navigate("/"), 250);
+    // ✅ Save credentials safely
+    const user = res.data.admin || res.data.user; // supports both naming
+    if (!user) throw new Error("Invalid login response");
+
+    localStorage.setItem("accessToken", res.data.accessToken);
+    localStorage.setItem("role", user.role);
+    localStorage.setItem("userEmail", user.email);
+
+    toast.success("Login successful!");
+
+    // ✅ Role-based redirect
+    if (user.role === "marketer") {
+      navigate("/free-tools");
     } else {
-      toast.error("No access token received");
+      navigate("/");
     }
   } catch (err) {
-    console.error("2FA verification error:", err);
-    toast.error(err.response?.data?.message || "Invalid 2FA code");
+    console.error("Login error:", err);
+    setError(err.response?.data?.message || "Invalid login credentials");
+    toast.error("Invalid login");
+  } finally {
+    setLoading(false);
+    setLoadingText("");
   }
 };
 
 
+  // ✅ Handle 2FA verification
+  const handleVerify2FA = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await api.post("/auth/admin/verify-login-2fa", {
+        token: twofaCode,
+        twofaToken: tempToken,
+      });
+
+      if (res.data.accessToken) {
+        localStorage.setItem("accessToken", res.data.accessToken);
+        localStorage.setItem("role", "admin"); // only admins use 2FA
+        toast.success("2FA verified successfully!");
+        setTimeout(() => navigate("/"), 250);
+      } else {
+        toast.error("No access token received");
+      }
+    } catch (err) {
+      console.error("2FA verification error:", err);
+      toast.error(err.response?.data?.message || "Invalid 2FA code");
+    }
+  };
+
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-gray-950 px-6">
-      {/* ====== LOADING OVERLAY ====== */}
       {loading && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm z-50">
           <Loader2 className="animate-spin text-teal-400 w-10 h-10 mb-3" />
@@ -84,13 +97,12 @@ export default function Login() {
         </div>
       )}
 
-      {/* ====== FORM ====== */}
       <form
         onSubmit={stage === "login" ? handleLogin : handleVerify2FA}
         className="bg-gray-900/80 border border-gray-800 rounded-xl p-8 w-full max-w-md shadow-lg space-y-6 relative"
       >
         <h1 className="text-2xl font-bold text-center text-white lead-text">
-          {stage === "login" ? "Admin Login" : "Two-Factor Verification"}
+          {stage === "login" ? "Portal Login" : "Two-Factor Verification"}
         </h1>
 
         {error && (
@@ -172,7 +184,6 @@ export default function Login() {
             >
               Verify Code
             </button>
-            
 
             <p
               onClick={() => setStage("login")}

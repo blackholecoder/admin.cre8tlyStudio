@@ -11,8 +11,27 @@ export default function Settings() {
   const [qr, setQr] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [maintenance, setMaintenance] = useState(false);
+
 
   const token = localStorage.getItem("accessToken");
+  const role = localStorage.getItem("role");
+
+
+  useEffect(() => {
+  const fetchMaintenance = async () => {
+    try {
+      const res = await api.get(
+        "https://cre8tlystudio.com/api/admin/settings/maintenance",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setMaintenance(res.data.maintenance);
+    } catch {
+      console.warn("Could not fetch maintenance status");
+    }
+  };
+  fetchMaintenance();
+}, [token]);
 
   // ✅ Fetch current user profile (including image)
   useEffect(() => {
@@ -159,7 +178,7 @@ export default function Settings() {
         <button
           type="submit"
           disabled={uploading}
-          className="w-full py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition lead-text"
+          className="w-full py-2 bg-green hover:bg-green text-black rounded-md transition lead-text"
         >
           {uploading ? "Uploading..." : "Upload Image"}
         </button>
@@ -208,9 +227,9 @@ export default function Settings() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-md transition"
+          className="w-full py-2 bg-red-600 hover:bg-green hover:text-black text-white rounded-md transition"
         >
-          {loading ? "Saving..." : "Save Changes"}
+          {loading ? "Saving..." : "Update"}
         </button>
       </form>
 
@@ -222,7 +241,7 @@ export default function Settings() {
         {!qr ? (
           <button
             onClick={enable2FA}
-            className="py-2 px-4 bg-purple-600 hover:bg-purple-700 rounded-md text-white lead-text"
+            className="py-2 px-4 bg-white hover:bg-purple-700 rounded-md text-black lead-text"
           >
             Enable 2FA
           </button>
@@ -238,7 +257,60 @@ export default function Settings() {
             />
           </>
         )}
+        {/* === Maintenance Mode === */}
+
+
       </div>
+      {role === "admin" && (
+      <div className="bg-gray-900 p-6 rounded-xl border border-gray-800 text-center space-y-3">
+  <h2 className="text-lg font-semibold text-white lead-text">Maintenance Mode</h2>
+  <p className="text-gray-400 text-sm lead-text">
+    Toggle to temporarily disable access for all users.
+  </p>
+
+  <button
+    onClick={async () => {
+  try {
+    // Fetch current status
+    const statusRes = await api.get(
+      "https://cre8tlystudio.com/api/admin/settings/maintenance",
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    const current = statusRes.data.maintenance;
+
+    // Flip it
+    const res = await api.post(
+      "https://cre8tlystudio.com/api/admin/settings/maintenance",
+      { enabled: !current },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    const newStatus = res.data.maintenance;
+    setMaintenance(newStatus);
+
+    // ✅ Toast color feedback
+    if (newStatus) {
+      toast.success("Maintenance mode enabled", { theme: "colored" });
+    } else {
+      toast.error("Maintenance mode disabled", { theme: "colored" });
+    }
+  } catch (err) {
+    console.error("Toggle failed:", err);
+    toast.error("Failed to toggle maintenance mode");
+  }
+}}
+
+    className={`px-5 py-2 rounded-md font-semibold transition ${
+      maintenance
+        ? "bg-green hover:bg-green text-black"
+        : "bg-red-600 hover:bg-red-700 text-white"
+    }`}
+  >
+    {maintenance ? "Maintenance Enabled" : "Enable Maintenance"}
+  </button>
+</div>
+      )}
+
     </div>
   );
 }

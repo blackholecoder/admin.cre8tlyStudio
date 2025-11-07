@@ -5,7 +5,6 @@ import {
   Calendar,
   ChevronDown,
   ChevronRight,
-  FileText,
   ExternalLink,
   CheckCircle,
   Edit3,

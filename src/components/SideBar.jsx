@@ -1,23 +1,71 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
-import { Home, Users, FileText, Settings, Menu, X, BookOpenText, Megaphone} from "lucide-react";
+import {
+  Home,
+  Users,
+  FileText,
+  Settings,
+  Menu,
+  X,
+  BookOpenText,
+  Megaphone,
+} from "lucide-react";
 import { headerLogo } from "../assets";
+import { api } from "../api/axios";
 
+const baseNav = [
+  
+  { name: "Settings", to: "/settings", icon: <Settings size={20} /> },
+];
 
-
-const navItems = [
+const adminNav = [
   { name: "Dashboard", to: "/", icon: <Home size={20} /> },
   { name: "Users", to: "/users", icon: <Users size={20} /> },
   { name: "Reports", to: "/reports", icon: <FileText size={20} /> },
   { name: "Messages", to: "/admin-messages", icon: <Megaphone size={20} /> },
-  { name: "Settings", to: "/settings", icon: <Settings size={20} /> },
   { name: "Ebooks", to: "/ebooks", icon: <BookOpenText size={20} /> },
+  { name: "Digital Assets", to: "/digital-assets", icon: <BookOpenText size={20} /> },
+];
+
+const marketerNav = [
+  { name: "Digital Assets", to: "/digital-assets", icon: <BookOpenText size={20} /> },
 ];
 
 export default function Sidebar() {
+  const [userRole, setUserRole] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const toggleMenu = () => setMobileOpen(!mobileOpen);
+
+  useEffect(() => {
+  const cachedRole = localStorage.getItem("role");
+  if (cachedRole) setUserRole(cachedRole);
+}, []);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem("accessToken");
+      if (!token) return;
+
+      try {
+        const res = await api.get("/auth/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUserRole(res.data.role);
+        localStorage.setItem("role", res.data.role); // cache for refresh
+      } catch (err) {
+        console.error("Failed to fetch role:", err);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  const navItems =
+    userRole === "admin"
+      ? [...baseNav, ...adminNav]
+      : userRole === "marketer"
+      ? [...baseNav, ...marketerNav]
+      : baseNav;
 
   return (
     <>
@@ -31,25 +79,27 @@ export default function Sidebar() {
           />
           Cre8tlyStudio
         </div>
-        <nav className="flex-1 overflow-y-auto py-6 space-y-1 lead-text">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.name}
-              to={item.to}
-              end
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-6 py-3 text-sm font-medium transition-colors ${
-                  isActive
-                    ? "bg-gray-800 text-teal-400"
-                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
-                }`
-              }
-            >
-              {item.icon}
-              {item.name}
-            </NavLink>
-          ))}
-        </nav>
+        {userRole && (
+          <nav className="flex-1 overflow-y-auto py-6 space-y-1 lead-text">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.name}
+                to={item.to}
+                end
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-6 py-3 text-sm font-medium transition-colors ${
+                    isActive
+                      ? "bg-gray-800 text-teal-400"
+                      : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                  }`
+                }
+              >
+                {item.icon}
+                {item.name}
+              </NavLink>
+            ))}
+          </nav>
+        )}
       </aside>
 
       {/* ======= Mobile Top Bar ======= */}
