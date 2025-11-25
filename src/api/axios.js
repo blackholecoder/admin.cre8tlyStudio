@@ -25,13 +25,63 @@ api.interceptors.request.use(
 );
 
 // ✅ Optional: global error handler
+let refreshPromise = null;
+
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      console.warn("Unauthorized – redirecting to login");
-      // e.g., window.location = "/login";
+  async (error) => {
+    const originalRequest = error.config;
+
+    // If not 401 OR already retried → reject
+    if (error.response?.status !== 401 || originalRequest._retry) {
+      return Promise.reject(error);
     }
-    return Promise.reject(error);
+
+    // Mark this request as retried
+    originalRequest._retry = true;
+
+    // If a refresh is already happening → wait for it
+    if (refreshPromise) {
+      const newToken = await refreshPromise;
+      originalRequest.headers.Authorization = `Bearer ${newToken}`;
+      return api(originalRequest);
+    }
+
+    // Start a new refresh request
+    refreshPromise = refreshTokens();
+
+    try {
+      const newToken = await refreshPromise;
+
+      // Apply token to the retry
+      originalRequest.headers.Authorization = `Bearer ${newToken}`;
+      return api(originalRequest);
+
+    } catch (err) {
+      console.error("❌ Refresh failed:", err);
+      logoutAdmin();
+      throw err;
+    } finally {
+      refreshPromise = null;
+    }
   }
 );
+
+// Actual refresh function
+async function refreshTokens() {
+  const refreshToken = localStorage.getItem("refreshToken");
+  if (!refreshToken) throw new Error("Missing refresh token");
+
+  const res = await api.post("/admin/auth/refresh", { token: refreshToken });
+
+  localStorage.setItem("accessToken", res.data.accessToken);
+  localStorage.setItem("refreshToken", res.data.refreshToken);
+
+  return res.data.accessToken;
+}
+
+function logoutAdmin() {
+  localStorage.clear();
+  window.location.href = "/login";
+}
+

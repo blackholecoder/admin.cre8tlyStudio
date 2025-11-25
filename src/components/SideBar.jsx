@@ -50,7 +50,7 @@ export default function Sidebar() {
       if (!token) return;
 
       try {
-        const res = await api.get("/auth/me", {
+        const res = await api.get("/admin/auth/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUserRole(res.data.role);

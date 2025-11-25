@@ -37,7 +37,7 @@ export default function Settings() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await api.get("/auth/me", {
+        const res = await api.get("/admin/auth/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.data.email) setEmail(res.data.email);
@@ -110,7 +110,7 @@ export default function Settings() {
         if (res.data.imageUrl) {
           setPreview(res.data.imageUrl);
         } else {
-          const me = await api.get("/auth/me", {
+          const me = await api.get("/admin/auth/me", {
             headers: { Authorization: `Bearer ${token}` },
           });
           if (me.data.profile_image) setPreview(me.data.profile_image);

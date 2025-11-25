@@ -26,7 +26,7 @@ export default function Header() {
       try {
         const token = localStorage.getItem("accessToken");
         if (!token) return;
-        const res = await api.get("/auth/me", {
+        const res = await api.get("/admin/auth/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setAdmin(res.data);

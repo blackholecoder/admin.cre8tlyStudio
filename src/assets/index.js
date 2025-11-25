@@ -1,4 +1,4 @@
-import headerLogo from './images/Robot-AI.svg';
+import headerLogo from './images/cre8tly-logo-white.png';
 
 
 export {

@@ -41,17 +41,23 @@ export default function Login() {
     if (!user) throw new Error("Invalid login response");
 
     localStorage.setItem("accessToken", res.data.accessToken);
+    localStorage.setItem("refreshToken", res.data.refreshToken);
     localStorage.setItem("role", user.role);
     localStorage.setItem("userEmail", user.email);
+
+    api.defaults.headers.common["Authorization"] = `Bearer ${res.data.accessToken}`;
+
 
     toast.success("Login successful!");
 
     // ✅ Role-based redirect
-    if (user.role === "marketer") {
-      navigate("/free-tools");
-    } else {
-      navigate("/");
-    }
+    setTimeout(() => {
+  if (user.role === "marketer") {
+    navigate("/free-tools");
+  } else {
+    navigate("/");
+  }
+}, 50);
   } catch (err) {
     console.error("Login error:", err);
     setError(err.response?.data?.message || "Invalid login credentials");
@@ -74,6 +80,7 @@ export default function Login() {
 
       if (res.data.accessToken) {
         localStorage.setItem("accessToken", res.data.accessToken);
+        localStorage.setItem("refreshToken", res.data.refreshToken);
         localStorage.setItem("role", "admin"); // only admins use 2FA
         toast.success("2FA verified successfully!");
         setTimeout(() => navigate("/"), 250);
