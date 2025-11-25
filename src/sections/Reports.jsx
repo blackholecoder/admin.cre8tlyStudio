@@ -124,6 +124,17 @@ export default function Reports() {
                         <h3 className="text-lg font-semibold text-white lead-text">
                           Lead Magnets ({user.lead_magnets?.length || 0})
                         </h3>
+                        {user.landing_url && (
+                          <a
+                            href={user.landing_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-400 hover:text-blue-300 flex items-center gap-1 text-sm underline"
+                          >
+                            <ExternalLink size={14} />
+                            Visit Landing Page
+                          </a>
+                        )}
 
                         {/* Scrollable container */}
                         <div className="max-h-[400px] overflow-y-auto overflow-x-auto rounded-lg border border-gray-800 bg-gray-900/40 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">

@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { api } from "../api/axios";
-import { Plus, Trash2, Calendar } from "lucide-react";
+import { Plus, Trash2, Calendar,  ChevronDown } from "lucide-react";
 import { toast } from "react-toastify"; // ✅ import toastify
 import "react-toastify/dist/ReactToastify.css";
 
@@ -11,7 +11,13 @@ export default function AdminMessages() {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [openMessageId, setOpenMessageId] = useState(null);
   const loaderRef = useRef(null);
+
+  function toggleMessage(id) {
+  setOpenMessageId((prev) => (prev === id ? null : id));
+  }
+
 
   useEffect(() => {
     fetchMessages(0, true);
@@ -119,33 +125,61 @@ export default function AdminMessages() {
 
       {/* 💬 Messages */}
       <div className="grid grid-cols-1 gap-4">
-        {messages.map((m) => (
-          <div
-            key={m.id}
-            className="bg-gray-900/70 border border-gray-800 rounded-xl p-4 space-y-3 shadow-md"
+        {messages.map((m) => {
+  const isOpen = openMessageId === m.id;
+
+  return (
+    <div
+      key={m.id}
+      className="bg-gray-900/70 border border-gray-800 rounded-xl p-4 shadow-md"
+    >
+      {/* Header Row */}
+      <div className="flex justify-between items-center cursor-pointer" onClick={() => toggleMessage(m.id)}>
+        <h2 className="text-white font-semibold text-base">{m.title}</h2>
+
+        <div className="flex items-center gap-3">
+          {/* Rotate arrow */}
+          <ChevronDown
+            size={18}
+            className={`text-gray-400 transition-transform duration-300 ${
+              isOpen ? "rotate-180" : ""
+            }`}
+          />
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete(m.id);
+            }}
+            className="text-red-400 hover:text-red-300"
           >
-            <div className="flex justify-between items-start">
-              <h2 className="text-white font-semibold text-base">{m.title}</h2>
-              <button
-                onClick={() => handleDelete(m.id)}
-                className="text-red-400 hover:text-red-300"
-              >
-                <Trash2 size={18} />
-              </button>
-            </div>
-            <p className="text-gray-400 text-sm whitespace-pre-line leading-relaxed">
-              {m.message}
-            </p>
-            <div className="flex items-center gap-2 text-xs text-gray-500">
-              <Calendar size={12} />
-              {new Date(m.created_at).toLocaleString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })}
-            </div>
-          </div>
-        ))}
+            <Trash2 size={18} />
+          </button>
+        </div>
+      </div>
+
+      {/* Collapsible Content */}
+      <div
+        className={`overflow-hidden transition-all duration-300 ${
+          isOpen ? "max-h-[500px] opacity-100 mt-3" : "max-h-0 opacity-0"
+        }`}
+      >
+        <p className="text-gray-400 text-sm whitespace-pre-line leading-relaxed">
+          {m.message}
+        </p>
+
+        <div className="flex items-center gap-2 text-xs text-gray-500 mt-3">
+          <Calendar size={12} />
+          {new Date(m.created_at).toLocaleString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          })}
+        </div>
+      </div>
+    </div>
+  );
+})}
+
       </div>
 
       {loading && (

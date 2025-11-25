@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { api } from "../api/axios";
-import { User, Mail, Calendar, Trash2  } from "lucide-react";
+import { User, Mail, Calendar, Trash2 } from "lucide-react";
 import { toast } from "react-toastify";
 
 export default function Users() {
   const [users, setUsers] = useState([]);
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [loadingUserId, setLoadingUserId] = useState(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalUsers, setTotalUsers] = useState(0);
   const [loading, setLoading] = useState(false);
 
   const handleGiveFreeSlots = async (userId, email) => {
@@ -64,10 +67,12 @@ export default function Users() {
       toast.success(res.data.message || "User created successfully");
 
       // refresh user list after adding
-      const refreshed = await api.get("/admin/users", {
+      const refreshed = await api.get(`/admin/users?page=${page}&limit=20`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(refreshed.data.users);
+      setTotalUsers(refreshed.data.total);
+      setTotalPages(refreshed.data.totalPages);
       setForm({ name: "", email: "", password: "" });
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to create user");
@@ -76,75 +81,73 @@ export default function Users() {
     }
   };
 
-const handleDeleteUser = (userId) => {
-  toast.info(
-    <div className="text-center">
-      <p className="font-medium text-gray-200 mb-2">
-        Are you sure you want to permanently delete this user?
-      </p>
-      <div className="flex justify-center gap-3 mt-2">
-        <button
-          onClick={async () => {
-            toast.dismiss();
-            try {
-              const token = localStorage.getItem("accessToken");
+  const handleDeleteUser = (userId) => {
+    toast.info(
+      <div className="text-center">
+        <p className="font-medium text-gray-200 mb-2">
+          Are you sure you want to permanently delete this user?
+        </p>
+        <div className="flex justify-center gap-3 mt-2">
+          <button
+            onClick={async () => {
+              toast.dismiss();
+              try {
+                const token = localStorage.getItem("accessToken");
 
-              await api.delete(`/admin/users/users/${userId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-              });
+                await api.delete(`/admin/users/users/${userId}`, {
+                  headers: { Authorization: `Bearer ${token}` },
+                });
 
-              setUsers((prev) => prev.filter((u) => u.id !== userId));
-              toast.success("✅ User deleted successfully");
-            } catch (err) {
-              console.error("Delete error:", err);
-              toast.error(
-                err.response?.data?.message || "❌ Failed to delete user"
-              );
-            }
-          }}
-          className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs font-semibold transition"
-        >
-          Delete
-        </button>
-        <button
-          onClick={() => toast.dismiss()}
-          className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded text-xs font-semibold transition"
-        >
-          Cancel
-        </button>
-      </div>
-    </div>,
-    {
-      position: "top-center",
-      autoClose: false,
-      closeOnClick: false,
-      draggable: false,
-      closeButton: false,
-      hideProgressBar: true,
-      className: "bg-gray-900 border border-gray-700 shadow-lg",
-    }
-  );
-};
-
+                setUsers((prev) => prev.filter((u) => u.id !== userId));
+                toast.success("✅ User deleted successfully");
+              } catch (err) {
+                console.error("Delete error:", err);
+                toast.error(
+                  err.response?.data?.message || "❌ Failed to delete user"
+                );
+              }
+            }}
+            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs font-semibold transition"
+          >
+            Delete
+          </button>
+          <button
+            onClick={() => toast.dismiss()}
+            className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded text-xs font-semibold transition"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>,
+      {
+        position: "top-center",
+        autoClose: false,
+        closeOnClick: false,
+        draggable: false,
+        closeButton: false,
+        hideProgressBar: true,
+        className: "bg-gray-900 border border-gray-700 shadow-lg",
+      }
+    );
+  };
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         const token = localStorage.getItem("accessToken");
-        const res = await api.get("/admin/users", {
+        const res = await api.get(`/admin/users?page=${page}&limit=20`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const sorted = [...res.data.users].sort(
-          (a, b) => new Date(b.created_at) - new Date(a.created_at)
-        );
-        setUsers(sorted);
+        setUsers(res.data.users);
+        setTotalPages(res.data.totalPages);
+        setTotalUsers(res.data.total);
       } catch (err) {
         console.error("Failed to fetch users:", err);
       }
     };
     fetchUsers();
-  }, []);
+  }, [page]);
 
   return (
     <div className="p-4 sm:p-8 space-y-6">
@@ -197,7 +200,7 @@ const handleDeleteUser = (userId) => {
             User Directory
           </h1>
           <p className="text-gray-400 text-sm mt-1 lead-text">
-            {users.length} total registered users
+            {totalUsers} total registered users
           </p>
         </div>
       </div>
@@ -269,9 +272,7 @@ const handleDeleteUser = (userId) => {
                           : "hover:scale-105"
                       }`}
                     >
-                      {loadingUserId === u.id
-                        ? "Processing..."
-                        : "Slots"}
+                      {loadingUserId === u.id ? "Processing..." : "Slots"}
                     </button>
 
                     <button
@@ -283,23 +284,43 @@ const handleDeleteUser = (userId) => {
                           : "hover:scale-105"
                       }`}
                     >
-                      {loadingUserId === u.id
-                        ? "Processing..."
-                        : "Books"}
+                      {loadingUserId === u.id ? "Processing..." : "Books"}
                     </button>
                     <button
-      onClick={() => handleDeleteUser(u.id)}
-      className="p-2 bg-gray-800 hover:bg-red-600 text-red-400 hover:text-white rounded-lg transition-all duration-200"
-      title="Delete User"
-    >
-      <Trash2 size={16} />
-    </button>
+                      onClick={() => handleDeleteUser(u.id)}
+                      className="p-2 bg-gray-800 hover:bg-red-600 text-red-400 hover:text-white rounded-lg transition-all duration-200"
+                      title="Delete User"
+                    >
+                      <Trash2 size={16} />
+                    </button>
                   </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+
+        <div className="flex items-center justify-center gap-3 py-6">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="px-4 py-2 bg-gray-800 rounded-md text-white disabled:opacity-40"
+          >
+            Previous
+          </button>
+
+          <span className="text-gray-300 text-sm">
+            Page {page} of {totalPages}
+          </span>
+
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="px-4 py-2 bg-gray-800 rounded-md text-white disabled:opacity-40"
+          >
+            Next
+          </button>
+        </div>
 
         {users.length === 0 && (
           <div className="text-center text-gray-400 py-10 text-sm lead-text">
