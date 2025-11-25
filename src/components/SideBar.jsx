@@ -9,6 +9,7 @@ import {
   X,
   BookOpenText,
   Megaphone,
+  Globe
 } from "lucide-react";
 import { headerLogo } from "../assets";
 import { api } from "../api/axios";
@@ -25,6 +26,7 @@ const adminNav = [
   { name: "Messages", to: "/admin-messages", icon: <Megaphone size={20} /> },
   { name: "Ebooks", to: "/ebooks", icon: <BookOpenText size={20} /> },
   { name: "Digital Assets", to: "/digital-assets", icon: <BookOpenText size={20} /> },
+  { name: "Analytics", to: "/website-analytics", icon: <Globe size={20} /> },
 ];
 
 const marketerNav = [

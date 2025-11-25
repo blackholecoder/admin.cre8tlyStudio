@@ -17,6 +17,7 @@ import Settings from "./sections/Settings";
 import EbooksAdmin from "./sections/EbooksAdmin";
 import AdminMessages from "./sections/MessageBoard";
 import FreeTools from "./sections/FreeTools";
+import WebsiteAnalytics from "./sections/WebsiteAnalytics";
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem("accessToken");
@@ -46,7 +47,7 @@ function ProtectedRoute({ children, allowedRoles = [] }) {
   // 🚫 If role not allowed, redirect to their proper home
   if (!allowedRoles.includes(role)) {
     if (role === "marketer") {
-      return <Navigate to="/free-tools" replace />;
+      return <Navigate to="/digital-assets" replace />;
     } else {
       return <Navigate to="/" replace />;
     }
@@ -54,7 +55,6 @@ function ProtectedRoute({ children, allowedRoles = [] }) {
 
   return children;
 }
-
 
 export default function App() {
   return (
@@ -122,6 +122,14 @@ export default function App() {
                         element={
                           <ProtectedRoute allowedRoles={["admin", "marketer"]}>
                             <FreeTools />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/website-analytics"
+                        element={
+                          <ProtectedRoute allowedRoles={["admin"]}>
+                            <WebsiteAnalytics />
                           </ProtectedRoute>
                         }
                       />
