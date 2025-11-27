@@ -18,6 +18,9 @@ import EbooksAdmin from "./sections/EbooksAdmin";
 import AdminMessages from "./sections/MessageBoard";
 import FreeTools from "./sections/FreeTools";
 import WebsiteAnalytics from "./sections/WebsiteAnalytics";
+import AdminSinglePost from "./sections/AdminSinglePost";
+import AdminTopicPosts from "./sections/AdminTopicPosts";
+import AdminCommunityTopics from "./sections/AdminCommunityTopics";
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem("accessToken");
@@ -130,6 +133,30 @@ export default function App() {
                         element={
                           <ProtectedRoute allowedRoles={["admin"]}>
                             <WebsiteAnalytics />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/admin/community"
+                        element={
+                          <ProtectedRoute allowedRoles={["admin"]}>
+                            <AdminCommunityTopics />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/admin/community/topic/:topicId"
+                        element={
+                          <ProtectedRoute allowedRoles={["admin"]}>
+                            <AdminTopicPosts />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/admin/community/post/:postId"
+                        element={
+                          <ProtectedRoute allowedRoles={["admin"]}>
+                            <AdminSinglePost />
                           </ProtectedRoute>
                         }
                       />

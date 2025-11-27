@@ -79,9 +79,17 @@ export default function Login() {
       });
 
       if (res.data.accessToken) {
+         const user = res.data.user;
+
+         console.log("2FA USER:", res.data.user);
+console.log("2FA USER ID:", res.data.user?.id);
+
         localStorage.setItem("accessToken", res.data.accessToken);
         localStorage.setItem("refreshToken", res.data.refreshToken);
         localStorage.setItem("role", "admin"); // only admins use 2FA
+        localStorage.setItem("adminId", user.id);
+        console.log("Stored adminId:", localStorage.getItem("adminId"));
+
         toast.success("2FA verified successfully!");
         setTimeout(() => navigate("/"), 250);
       } else {
