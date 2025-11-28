@@ -25,31 +25,19 @@ const adminNav = [
   { name: "Users", to: "/users", icon: <Users size={20} /> },
   { name: "Reports", to: "/reports", icon: <FileText size={20} /> },
   { name: "Messages", to: "/admin-messages", icon: <Megaphone size={20} /> },
-  { name: "Ebooks", to: "/ebooks", icon: <BookOpenText size={20} /> },
-  {
-    name: "Digital Assets",
-    to: "/digital-assets",
-    icon: <BookOpenText size={20} />,
-  },
   { name: "Analytics", to: "/website-analytics", icon: <Globe size={20} /> },
   {
     name: "Community Posts",
     to: "/admin/community",
     icon: <MessageSquare size={20} />,
+    superOnly: true,
   },
   {
   name: "Create Community Post",
   to: "/admin/community/create-post",
   icon: <PlusCircle size={20} />,
+  superOnly: true,
 },
-];
-
-const marketerNav = [
-  {
-    name: "Digital Assets",
-    to: "/digital-assets",
-    icon: <BookOpenText size={20} />,
-  },
 ];
 
 export default function Sidebar() {
@@ -81,12 +69,17 @@ export default function Sidebar() {
     fetchUser();
   }, []);
 
-  const navItems =
-    userRole === "admin"
-      ? [...baseNav, ...adminNav]
-      : userRole === "marketer"
-      ? [...baseNav, ...marketerNav]
-      : baseNav;
+let navItems;
+
+
+if (userRole === "superadmin") {
+  navItems = [...adminNav, ...baseNav];
+} else if (userRole === "admin") {
+  navItems = [...adminNav.filter((item) => !item.superOnly), ...baseNav];
+} else {
+  navItems = baseNav;
+}
+
 
   return (
     <>

@@ -22,9 +22,7 @@ export default function Settings() {
   const fetchMaintenance = async () => {
     try {
       const res = await api.get(
-        "https://cre8tlystudio.com/api/admin/settings/maintenance",
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+        "/admin/settings/maintenance");
       setMaintenance(res.data.maintenance);
     } catch {
       console.warn("Could not fetch maintenance status");
@@ -37,9 +35,7 @@ export default function Settings() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await api.get("/admin/auth/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await api.get("/admin/auth/me");
         if (res.data.email) setEmail(res.data.email);
         if (res.data.profile_image) setPreview(res.data.profile_image);
       } catch (err) {
@@ -68,7 +64,6 @@ export default function Settings() {
       await api.put(
         "/auth/admin/update",
         { email, currentPassword, newPassword, profileImage: base64Image },
-        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       toast.success("Settings updated successfully!");
@@ -82,7 +77,6 @@ export default function Settings() {
   // ✅ Handle profile image upload separately
   const handleImageUpload = async (e) => {
     e.preventDefault();
-    console.log("🟢 Upload button clicked");
     if (!image) return toast.error("Please select an image first");
     if (image.size > 2 * 1024 * 1024)
       return toast.error("Image must be under 2 MB");
@@ -90,7 +84,7 @@ export default function Settings() {
     setUploading(true);
     const reader = new FileReader();
     reader.onloadend = async () => {
-      console.log("🟢 FileReader finished loading");
+
       try {
         const base64 = reader.result.split(",")[1];
         const res = await api.put(
@@ -100,7 +94,6 @@ export default function Settings() {
             fileName: image.name,
             mimeType: image.type,
           },
-          { headers: { Authorization: `Bearer ${token}` } }
         );
 
         toast.success("Profile image updated!");
@@ -110,9 +103,7 @@ export default function Settings() {
         if (res.data.imageUrl) {
           setPreview(res.data.imageUrl);
         } else {
-          const me = await api.get("/admin/auth/me", {
-            headers: { Authorization: `Bearer ${token}` },
-          });
+          const me = await api.get("/admin/auth/me");
           if (me.data.profile_image) setPreview(me.data.profile_image);
         }
       } catch (err) {
@@ -130,7 +121,6 @@ export default function Settings() {
       const res = await api.post(
         "/auth/admin/enable-2fa",
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
       );
       setQr(res.data.qr);
       toast.info("Scan the QR with Google Authenticator!");
@@ -261,7 +251,7 @@ export default function Settings() {
 
 
       </div>
-      {role === "admin" && (
+      {role === "superadmin" && (
       <div className="bg-gray-900 p-6 rounded-xl border border-gray-800 text-center space-y-3">
   <h2 className="text-lg font-semibold text-white lead-text">Maintenance Mode</h2>
   <p className="text-gray-400 text-sm lead-text">

@@ -14,9 +14,7 @@ import Users from "./sections/Users";
 import Reports from "./sections/Reports";
 import Login from "./auth/Login";
 import Settings from "./sections/Settings";
-import EbooksAdmin from "./sections/EbooksAdmin";
 import AdminMessages from "./sections/MessageBoard";
-import FreeTools from "./sections/FreeTools";
 import WebsiteAnalytics from "./sections/WebsiteAnalytics";
 import AdminSinglePost from "./sections/AdminSinglePost";
 import AdminTopicPosts from "./sections/AdminTopicPosts";
@@ -48,17 +46,14 @@ function ProtectedRoute({ children, allowedRoles = [] }) {
     return children;
   }
 
-  // 🚫 If role not allowed, redirect to their proper home
+  // 🚫 If role not allowed, send them to dashboard
   if (!allowedRoles.includes(role)) {
-    if (role === "marketer") {
-      return <Navigate to="/digital-assets" replace />;
-    } else {
-      return <Navigate to="/" replace />;
-    }
+    return <Navigate to="/" replace />;
   }
 
   return children;
 }
+
 
 export default function App() {
   return (
@@ -82,7 +77,7 @@ export default function App() {
                       <Route
                         path="/users"
                         element={
-                          <ProtectedRoute allowedRoles={["admin"]}>
+                          <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
                             <Users />
                           </ProtectedRoute>
                         }
@@ -90,7 +85,7 @@ export default function App() {
                       <Route
                         path="/reports"
                         element={
-                          <ProtectedRoute allowedRoles={["admin"]}>
+                          <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
                             <Reports />
                           </ProtectedRoute>
                         }
@@ -98,41 +93,24 @@ export default function App() {
                       <Route
                         path="/admin-messages"
                         element={
-                          <ProtectedRoute allowedRoles={["admin"]}>
+                          <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
                             <AdminMessages />
                           </ProtectedRoute>
                         }
                       />
-                      <Route
-                        path="/ebooks"
-                        element={
-                          <ProtectedRoute allowedRoles={["admin"]}>
-                            <EbooksAdmin />
-                          </ProtectedRoute>
-                        }
-                      />
-
                       {/* ✅ Shared routes */}
                       <Route
                         path="/settings"
                         element={
-                          <ProtectedRoute allowedRoles={["admin", "marketer"]}>
+                          <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
                             <Settings />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/digital-assets"
-                        element={
-                          <ProtectedRoute allowedRoles={["admin", "marketer"]}>
-                            <FreeTools />
                           </ProtectedRoute>
                         }
                       />
                       <Route
                         path="/website-analytics"
                         element={
-                          <ProtectedRoute allowedRoles={["admin"]}>
+                          <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
                             <WebsiteAnalytics />
                           </ProtectedRoute>
                         }
@@ -140,7 +118,7 @@ export default function App() {
                       <Route
                         path="/admin/community"
                         element={
-                          <ProtectedRoute allowedRoles={["admin"]}>
+                          <ProtectedRoute allowedRoles={["superadmin"]}>
                             <AdminCommunityTopics />
                           </ProtectedRoute>
                         }
@@ -148,7 +126,7 @@ export default function App() {
                       <Route
                         path="/admin/community/topic/:topicId"
                         element={
-                          <ProtectedRoute allowedRoles={["admin"]}>
+                          <ProtectedRoute allowedRoles={["superadmin"]}>
                             <AdminTopicPosts />
                           </ProtectedRoute>
                         }
@@ -156,7 +134,7 @@ export default function App() {
                       <Route
                         path="/admin/community/post/:postId"
                         element={
-                          <ProtectedRoute allowedRoles={["admin"]}>
+                          <ProtectedRoute allowedRoles={["superadmin"]}>
                             <AdminSinglePost />
                           </ProtectedRoute>
                         }
@@ -164,7 +142,7 @@ export default function App() {
                       <Route
                          path="/admin/community/create-post"
                         element={
-                          <ProtectedRoute allowedRoles={["admin"]}>
+                          <ProtectedRoute allowedRoles={["superadmin"]}>
                             <AdminCreatePostModal />
                           </ProtectedRoute>
                         }

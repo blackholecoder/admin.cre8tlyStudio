@@ -42,7 +42,7 @@ export default function Login() {
 
     localStorage.setItem("accessToken", res.data.accessToken);
     localStorage.setItem("refreshToken", res.data.refreshToken);
-    localStorage.setItem("role", user.role);
+    localStorage.setItem("role", user.role); // superadmin or admin
     localStorage.setItem("userEmail", user.email);
 
     api.defaults.headers.common["Authorization"] = `Bearer ${res.data.accessToken}`;
@@ -51,13 +51,10 @@ export default function Login() {
     toast.success("Login successful!");
 
     // ✅ Role-based redirect
-    setTimeout(() => {
-  if (user.role === "marketer") {
-    navigate("/free-tools");
-  } else {
-    navigate("/");
-  }
+   setTimeout(() => {
+  navigate("/");
 }, 50);
+
   } catch (err) {
     console.error("Login error:", err);
     setError(err.response?.data?.message || "Invalid login credentials");
@@ -81,14 +78,10 @@ export default function Login() {
       if (res.data.accessToken) {
          const user = res.data.user;
 
-         console.log("2FA USER:", res.data.user);
-console.log("2FA USER ID:", res.data.user?.id);
-
         localStorage.setItem("accessToken", res.data.accessToken);
         localStorage.setItem("refreshToken", res.data.refreshToken);
-        localStorage.setItem("role", "admin"); // only admins use 2FA
+        localStorage.setItem("role", user.role); 
         localStorage.setItem("adminId", user.id);
-        console.log("Stored adminId:", localStorage.getItem("adminId"));
 
         toast.success("2FA verified successfully!");
         setTimeout(() => navigate("/"), 250);
