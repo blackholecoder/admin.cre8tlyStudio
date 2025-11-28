@@ -21,6 +21,7 @@ import WebsiteAnalytics from "./sections/WebsiteAnalytics";
 import AdminSinglePost from "./sections/AdminSinglePost";
 import AdminTopicPosts from "./sections/AdminTopicPosts";
 import AdminCommunityTopics from "./sections/AdminCommunityTopics";
+import AdminCreatePostModal from "./sections/AdminCreatePostModal";
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem("accessToken");
@@ -157,6 +158,14 @@ export default function App() {
                         element={
                           <ProtectedRoute allowedRoles={["admin"]}>
                             <AdminSinglePost />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                         path="/admin/community/create-post"
+                        element={
+                          <ProtectedRoute allowedRoles={["admin"]}>
+                            <AdminCreatePostModal />
                           </ProtectedRoute>
                         }
                       />

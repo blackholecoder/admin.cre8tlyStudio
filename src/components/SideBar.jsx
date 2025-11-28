@@ -10,13 +10,13 @@ import {
   BookOpenText,
   Megaphone,
   Globe,
-  MessageSquare
+  MessageSquare,
+  PlusCircle
 } from "lucide-react";
 import { headerLogo } from "../assets";
 import { api } from "../api/axios";
 
 const baseNav = [
-  
   { name: "Settings", to: "/settings", icon: <Settings size={20} /> },
 ];
 
@@ -26,14 +26,30 @@ const adminNav = [
   { name: "Reports", to: "/reports", icon: <FileText size={20} /> },
   { name: "Messages", to: "/admin-messages", icon: <Megaphone size={20} /> },
   { name: "Ebooks", to: "/ebooks", icon: <BookOpenText size={20} /> },
-  { name: "Digital Assets", to: "/digital-assets", icon: <BookOpenText size={20} /> },
+  {
+    name: "Digital Assets",
+    to: "/digital-assets",
+    icon: <BookOpenText size={20} />,
+  },
   { name: "Analytics", to: "/website-analytics", icon: <Globe size={20} /> },
-  { name: "Community Posts", to: "/admin/community", icon: <MessageSquare size={20} /> },
-
+  {
+    name: "Community Posts",
+    to: "/admin/community",
+    icon: <MessageSquare size={20} />,
+  },
+  {
+  name: "Create Community Post",
+  to: "/admin/community/create-post",
+  icon: <PlusCircle size={20} />,
+},
 ];
 
 const marketerNav = [
-  { name: "Digital Assets", to: "/digital-assets", icon: <BookOpenText size={20} /> },
+  {
+    name: "Digital Assets",
+    to: "/digital-assets",
+    icon: <BookOpenText size={20} />,
+  },
 ];
 
 export default function Sidebar() {
@@ -43,9 +59,9 @@ export default function Sidebar() {
   const toggleMenu = () => setMobileOpen(!mobileOpen);
 
   useEffect(() => {
-  const cachedRole = localStorage.getItem("role");
-  if (cachedRole) setUserRole(cachedRole);
-}, []);
+    const cachedRole = localStorage.getItem("role");
+    if (cachedRole) setUserRole(cachedRole);
+  }, []);
 
   useEffect(() => {
     const fetchUser = async () => {

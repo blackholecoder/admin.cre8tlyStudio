@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { BadgeCheck } from "lucide-react";
+import { BadgeCheck, ShieldCheck } from "lucide-react";
+import { headerLogo } from "../../assets/images";
 
 export default function CommentNode({
   comment,
@@ -15,6 +16,7 @@ export default function CommentNode({
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(comment.body);
+  const [showReplies, setShowReplies] = useState(false);
 
   return (
     <div className="mb-3">
@@ -22,7 +24,13 @@ export default function CommentNode({
       <div className="bg-gray-900/30 p-3 rounded border border-gray-700 ml-0">
         <div className="flex items-center gap-2 mb-1">
           {/* Avatar */}
-          {comment.author_image ? (
+          {comment.author_role === "admin" ? (
+            <img
+              src={headerLogo}
+              alt="Cre8tly"
+              className="w-6 h-6 rounded-full object-cover border border-gray-700 bg-gray-800 p-0.5"
+            />
+          ) : comment.author_image ? (
             <img
               src={comment.author_image}
               alt="avatar"
@@ -39,7 +47,10 @@ export default function CommentNode({
 
           {/* Admin badge */}
           {comment.author_role === "admin" && (
-            <BadgeCheck size={14} className="text-green" />
+            <span className="flex items-center gap-1 text-white text-[10px] px-2 py-0.5 border border-green rounded-full">
+              <ShieldCheck size={12} className="text-green" />
+              Official
+            </span>
           )}
         </div>
 
@@ -146,23 +157,46 @@ export default function CommentNode({
       </div>
 
       {/* Nested Children */}
+      {/* Replies toggle */}
       {comment.children?.length > 0 && (
-        <div className="ml-6 mt-2 border-l border-gray-700 pl-4">
-          {comment.children.map((child) => (
-            <CommentNode
-              key={child.id}
-              comment={child}
-              postId={postId}
-              replyingTo={replyingTo}
-              replyBody={replyBody}
-              setReplyingTo={setReplyingTo}
-              setReplyBody={setReplyBody}
-              handleReplyToComment={handleReplyToComment}
-              adminId={adminId}
-              onDelete={onDelete}
-              onEdit={onEdit}
-            />
-          ))}
+        <div className="ml-4 mt-2">
+          {!showReplies ? (
+            <button
+              className="text-xs text-green hover:text-gray-600 underline mt-2"
+              onClick={() => setShowReplies(true)}
+            >
+              View {comment.children.length === 1 ? "Reply" : "Replies"} (
+              {comment.children.length})
+            </button>
+          ) : (
+            <button
+              className="text-xs text-gray-400 hover:text-white underline"
+              onClick={() => setShowReplies(false)}
+            >
+              Hide replies
+            </button>
+          )}
+
+          {/* Render replies ONLY when expanded */}
+          {showReplies && (
+            <div className="ml-2 mt-2 border-l border-gray-700 pl-4">
+              {comment.children.map((child) => (
+                <CommentNode
+                  key={child.id}
+                  comment={child}
+                  postId={postId}
+                  replyingTo={replyingTo}
+                  replyBody={replyBody}
+                  setReplyingTo={setReplyingTo}
+                  setReplyBody={setReplyBody}
+                  handleReplyToComment={handleReplyToComment}
+                  adminId={adminId}
+                  onDelete={onDelete}
+                  onEdit={onEdit}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
