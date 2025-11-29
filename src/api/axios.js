@@ -1,7 +1,12 @@
+
+
 import axios from "axios";
 
 // 👇 Base URL for your backend
-const BASE_URL = "https://cre8tlystudio.com/api";
+const BASE_URL =
+  import.meta.env.MODE === "development"
+    ? "https://cre8tlystudio.com/api"
+    : "https://cre8tlystudio.com/api";
 
 // ✅ Create a reusable Axios instance
 export const api = axios.create({
@@ -11,6 +16,7 @@ export const api = axios.create({
     "Content-Type": "application/json",
   },
 });
+
 
 // ✅ Optional: attach token automatically if you use auth
 api.interceptors.request.use(
@@ -32,6 +38,10 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+     if (originalRequest?.url?.includes("/auth/admin/verify-login-2fa")) {
+      return Promise.reject(error);
+    }
+
     // If not 401 OR already retried → reject
     if (error.response?.status !== 401 || originalRequest._retry) {
       return Promise.reject(error);
@@ -52,7 +62,6 @@ api.interceptors.response.use(
 
     try {
       const newToken = await refreshPromise;
-
       // Apply token to the retry
       originalRequest.headers.Authorization = `Bearer ${newToken}`;
       return api(originalRequest);
@@ -72,13 +81,18 @@ async function refreshTokens() {
   const refreshToken = localStorage.getItem("refreshToken");
   if (!refreshToken) throw new Error("Missing refresh token");
 
-  const res = await api.post("/admin/auth/refresh", { token: refreshToken });
+  const res = await api.post(
+    "/admin/auth/refresh",
+    { token: refreshToken },
+    { headers: { "x-admin-refresh": "true" } }
+  );
 
   localStorage.setItem("accessToken", res.data.accessToken);
   localStorage.setItem("refreshToken", res.data.refreshToken);
 
   return res.data.accessToken;
 }
+
 
 function logoutAdmin() {
   localStorage.clear();

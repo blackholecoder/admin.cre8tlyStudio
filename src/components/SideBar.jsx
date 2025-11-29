@@ -7,11 +7,11 @@ import {
   Settings,
   Menu,
   X,
-  BookOpenText,
   Megaphone,
   Globe,
   MessageSquare,
-  PlusCircle
+  PlusCircle,
+  Package,
 } from "lucide-react";
 import { headerLogo } from "../assets";
 import { api } from "../api/axios";
@@ -24,6 +24,12 @@ const adminNav = [
   { name: "Dashboard", to: "/", icon: <Home size={20} /> },
   { name: "Users", to: "/users", icon: <Users size={20} /> },
   { name: "Reports", to: "/reports", icon: <FileText size={20} /> },
+  {
+    name: "Deliveries",
+    to: "/deliveries",
+    icon: <Package size={20} />,
+    superOnly: true,
+  },
   { name: "Messages", to: "/admin-messages", icon: <Megaphone size={20} /> },
   { name: "Analytics", to: "/website-analytics", icon: <Globe size={20} /> },
   {
@@ -33,11 +39,11 @@ const adminNav = [
     superOnly: true,
   },
   {
-  name: "Create Community Post",
-  to: "/admin/community/create-post",
-  icon: <PlusCircle size={20} />,
-  superOnly: true,
-},
+    name: "Create Community Post",
+    to: "/admin/community/create-post",
+    icon: <PlusCircle size={20} />,
+    superOnly: true,
+  },
 ];
 
 export default function Sidebar() {
@@ -57,9 +63,7 @@ export default function Sidebar() {
       if (!token) return;
 
       try {
-        const res = await api.get("/admin/auth/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await api.get("/admin/auth/me");
         setUserRole(res.data.role);
         localStorage.setItem("role", res.data.role); // cache for refresh
       } catch (err) {
@@ -69,17 +73,15 @@ export default function Sidebar() {
     fetchUser();
   }, []);
 
-let navItems;
+  let navItems;
 
-
-if (userRole === "superadmin") {
-  navItems = [...adminNav, ...baseNav];
-} else if (userRole === "admin") {
-  navItems = [...adminNav.filter((item) => !item.superOnly), ...baseNav];
-} else {
-  navItems = baseNav;
-}
-
+  if (userRole === "superadmin") {
+    navItems = [...adminNav, ...baseNav];
+  } else if (userRole === "admin") {
+    navItems = [...adminNav.filter((item) => !item.superOnly), ...baseNav];
+  } else {
+    navItems = baseNav;
+  }
 
   return (
     <>

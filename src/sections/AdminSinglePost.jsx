@@ -242,6 +242,15 @@ export default function AdminSinglePost() {
       <div className="flex items-center justify-between text-sm text-gray-400 pb-2">
   {/* Left side — breadcrumb links */}
   <div className="flex items-center gap-1">
+
+    <button
+    onClick={() => navigate(`/admin/community/topic/${post.topic_id}`)}
+    className="flex items-center gap-1 text-green hover:text-white"
+  >
+    <ArrowLeft size={14} />
+    Back
+  </button>
+  <span className="text-gray-600">/</span>
     <span
       className="cursor-pointer hover:text-white"
       onClick={() => navigate("/admin/community")}
@@ -264,13 +273,7 @@ export default function AdminSinglePost() {
   </div>
 
   {/* Right side — Back button */}
-  <button
-    onClick={() => navigate(`/admin/community/topic/${post.topic_id}`)}
-    className="flex items-center gap-1 text-gray-400 hover:text-white"
-  >
-    <ArrowLeft size={14} />
-    Back
-  </button>
+  
 </div>
 
 

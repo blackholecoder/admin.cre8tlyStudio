@@ -20,6 +20,7 @@ import AdminSinglePost from "./sections/AdminSinglePost";
 import AdminTopicPosts from "./sections/AdminTopicPosts";
 import AdminCommunityTopics from "./sections/AdminCommunityTopics";
 import AdminCreatePostModal from "./sections/AdminCreatePostModal";
+import Deliveries from "./sections/Deliveries";
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem("accessToken");
@@ -144,6 +145,14 @@ export default function App() {
                         element={
                           <ProtectedRoute allowedRoles={["superadmin"]}>
                             <AdminCreatePostModal />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                         path="/deliveries"
+                        element={
+                          <ProtectedRoute allowedRoles={["superadmin"]}>
+                            <Deliveries />
                           </ProtectedRoute>
                         }
                       />

@@ -10,7 +10,7 @@ export default function StatCard({ title, value, icon, trend }) {
           {trend && (
             <p
               className={`text-xs mt-1 lead-text ${
-                trend.positive ? "text-teal-400" : "text-red-400"
+                trend.positive ? "text-teal-400" : "text-yellow"
               }`}
             >
               {trend.label}

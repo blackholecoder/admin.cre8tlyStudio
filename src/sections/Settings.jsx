@@ -168,7 +168,7 @@ export default function Settings() {
         <button
           type="submit"
           disabled={uploading}
-          className="w-full py-2 bg-green hover:bg-green text-black rounded-md transition lead-text"
+          className="w-full py-2 bg-royalPurple hover:bg-green text-white rounded-md transition lead-text"
         >
           {uploading ? "Uploading..." : "Upload Image"}
         </button>
@@ -264,7 +264,6 @@ export default function Settings() {
     // Fetch current status
     const statusRes = await api.get(
       "https://cre8tlystudio.com/api/admin/settings/maintenance",
-      { headers: { Authorization: `Bearer ${token}` } }
     );
     const current = statusRes.data.maintenance;
 
@@ -272,7 +271,6 @@ export default function Settings() {
     const res = await api.post(
       "https://cre8tlystudio.com/api/admin/settings/maintenance",
       { enabled: !current },
-      { headers: { Authorization: `Bearer ${token}` } }
     );
 
     const newStatus = res.data.maintenance;

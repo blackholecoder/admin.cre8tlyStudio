@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Users, FileText, Clock, CheckCircle } from "lucide-react";
 import StatCard from "../components/StatCard";
 import { api } from "../api/axios";
+import RecentMagnets from "../components/RecentMagnets";
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -10,6 +11,9 @@ export default function Dashboard() {
     completed_magnets: 0,
     awaiting_magnets: 0,
   });
+
+  const role = localStorage.getItem("role");
+  const isSuperAdmin = role === "superadmin";
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -49,19 +53,12 @@ export default function Dashboard() {
           title="Awaiting"
           value={stats.awaiting_magnets}
           icon={<Clock />}
-          trend={{ label: "Awaiting creation or pending", positive: false }}
+          trend={{ label: "Awaiting creation", positive: false }}
         />
       </div>
 
       {/* Optional: Future activity section */}
-      <section className="p-6 bg-gray-800 rounded-xl">
-        <h2 className="text-lg font-semibold mb-4 text-white lead-text">
-          Recent Lead Magnets
-        </h2>
-        <p className="text-gray-400 text-sm lead-text">
-          Coming soon, show latest lead magnets and their statuses here.
-        </p>
-      </section>
+      {isSuperAdmin && <RecentMagnets />}
     </div>
   );
 }

@@ -26,9 +26,7 @@ export default function Header() {
       try {
         const token = localStorage.getItem("accessToken");
         if (!token) return;
-        const res = await api.get("/admin/auth/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await api.get("/admin/auth/me");
         setAdmin(res.data);
       } catch (err) {
         console.error("Failed to load admin data:", err);
@@ -37,10 +35,14 @@ export default function Header() {
     fetchAdmin();
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    window.location.href = "/login";
-  };
+  const handleLogout = async () => {
+  try {
+    await api.post("/auth/admin-logout");
+  } catch {}
+
+  localStorage.removeItem("accessToken");
+  window.location.href = "/login";
+};
 
   return (
     <header className="flex items-center justify-between h-16 px-4 sm:px-6 border-b border-gray-800 bg-gray-900 sticky top-14 md:top-0 z-20">

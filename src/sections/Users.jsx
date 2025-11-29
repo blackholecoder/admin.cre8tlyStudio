@@ -15,13 +15,9 @@ export default function Users() {
   const handleGiveFreeSlots = async (userId, email) => {
     setLoadingUserId(userId);
     try {
-      const token = localStorage.getItem("accessToken");
       await api.post(
         "/admin/give-free-magnets",
         { userId, count: 1 },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
       );
       toast.success(`Gave 1 free slot to ${email}`);
     } catch (err) {
@@ -34,11 +30,9 @@ export default function Users() {
   const handleGiveFreeBookSlots = async (userId, email) => {
     setLoadingUserId(userId);
     try {
-      const token = localStorage.getItem("accessToken");
       await api.post(
         "/admin/give-free-books",
         { userId, count: 1 },
-        { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success(`Gave 1 free book slot to ${email}`);
     } catch (err) {
@@ -56,20 +50,16 @@ export default function Users() {
 
     try {
       setLoading(true);
-      const token = localStorage.getItem("accessToken");
 
       const res = await api.post(
         "/admin/create-user-with-slots",
         { ...form, slots: 5 },
-        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       toast.success(res.data.message || "User created successfully");
 
       // refresh user list after adding
-      const refreshed = await api.get(`/admin/users?page=${page}&limit=20`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const refreshed = await api.get(`/admin/users?page=${page}&limit=20`);
       setUsers(refreshed.data.users);
       setTotalUsers(refreshed.data.total);
       setTotalPages(refreshed.data.totalPages);
@@ -92,11 +82,8 @@ export default function Users() {
             onClick={async () => {
               toast.dismiss();
               try {
-                const token = localStorage.getItem("accessToken");
 
-                await api.delete(`/admin/users/users/${userId}`, {
-                  headers: { Authorization: `Bearer ${token}` },
-                });
+                await api.delete(`/admin/users/users/${userId}`);
 
                 setUsers((prev) => prev.filter((u) => u.id !== userId));
                 toast.success("✅ User deleted successfully");
@@ -134,10 +121,8 @@ export default function Users() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const token = localStorage.getItem("accessToken");
-        const res = await api.get(`/admin/users?page=${page}&limit=20`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+
+        const res = await api.get(`/admin/users?page=${page}&limit=20`);
 
         setUsers(res.data.users);
         setTotalPages(res.data.totalPages);

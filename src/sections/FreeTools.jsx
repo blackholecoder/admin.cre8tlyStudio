@@ -8,12 +8,10 @@ export default function FreeTools() {
   const handleGiveTools = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("accessToken");
 
       await api.post(
         "/admin/give-free-magnets",
         { count: 1 },
-        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       toast.success("✅ 1 free digital asset slot added to your account!");

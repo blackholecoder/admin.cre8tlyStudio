@@ -21,66 +21,68 @@ export default function Login() {
   }, [stage]);
 
   // ✅ Handle first login step
- const handleLogin = async (e) => {
-  e.preventDefault();
-  setError("");
-  setLoading(true);
-  setLoadingText("Signing in...");
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    setLoadingText("Signing in...");
 
-  try {
-    const res = await api.post("/auth/admin/login", { email, password });
+    try {
+      const res = await api.post("/auth/admin/login", { email, password });
 
-    if (res.data.twofaRequired) {
-      setStage("2fa");
-      setTempToken(res.data.twofaToken);
-      return;
+      if (res.data.twofaRequired) {
+        setStage("2fa");
+        setTempToken(res.data.twofaToken);
+        return;
+      }
+
+      // ✅ Save credentials safely
+      const user = res.data.admin || res.data.user; // supports both naming
+      if (!user) throw new Error("Invalid login response");
+
+      localStorage.setItem("accessToken", res.data.accessToken);
+      localStorage.setItem("refreshToken", res.data.refreshToken);
+      localStorage.setItem("role", user.role); // superadmin or admin
+      localStorage.setItem("userEmail", user.email);
+
+      api.defaults.headers.common[
+        "Authorization"
+      ] = `Bearer ${res.data.accessToken}`;
+
+      toast.success("Login successful!");
+
+      // ✅ Role-based redirect
+      setTimeout(() => {
+        navigate("/");
+      }, 50);
+    } catch (err) {
+      console.error("Login error:", err);
+      setError(err.response?.data?.message || "Invalid login credentials");
+      toast.error("Invalid login");
+    } finally {
+      setLoading(false);
+      setLoadingText("");
     }
-
-    // ✅ Save credentials safely
-    const user = res.data.admin || res.data.user; // supports both naming
-    if (!user) throw new Error("Invalid login response");
-
-    localStorage.setItem("accessToken", res.data.accessToken);
-    localStorage.setItem("refreshToken", res.data.refreshToken);
-    localStorage.setItem("role", user.role); // superadmin or admin
-    localStorage.setItem("userEmail", user.email);
-
-    api.defaults.headers.common["Authorization"] = `Bearer ${res.data.accessToken}`;
-
-
-    toast.success("Login successful!");
-
-    // ✅ Role-based redirect
-   setTimeout(() => {
-  navigate("/");
-}, 50);
-
-  } catch (err) {
-    console.error("Login error:", err);
-    setError(err.response?.data?.message || "Invalid login credentials");
-    toast.error("Invalid login");
-  } finally {
-    setLoading(false);
-    setLoadingText("");
-  }
-};
-
+  };
 
   // ✅ Handle 2FA verification
   const handleVerify2FA = async (e) => {
     e.preventDefault();
     try {
+
+    
       const res = await api.post("/auth/admin/verify-login-2fa", {
         token: twofaCode,
         twofaToken: tempToken,
       });
 
+
       if (res.data.accessToken) {
-         const user = res.data.user;
+        const user = res.data.user;
 
         localStorage.setItem("accessToken", res.data.accessToken);
         localStorage.setItem("refreshToken", res.data.refreshToken);
-        localStorage.setItem("role", user.role); 
+        localStorage.setItem("role", user.role);
         localStorage.setItem("adminId", user.id);
 
         toast.success("2FA verified successfully!");
@@ -90,7 +92,30 @@ export default function Login() {
       }
     } catch (err) {
       console.error("2FA verification error:", err);
-      toast.error(err.response?.data?.message || "Invalid 2FA code");
+
+      // ⭐ RATE LIMIT (HTTP 429)
+      if (err.response?.status === 429) {
+        const msg =
+          err.response?.data?.message || "Too many attempts. Slow down.";
+        toast.error(msg);
+        setError(msg);
+        return;
+      }
+
+      // ⭐ LOCKOUT
+      if (err.response?.data?.message?.includes("Locked")) {
+        const msg = err.response.data.message;
+        toast.error(msg);
+        setError(msg);
+        return;
+      }
+
+      // ⭐ WRONG CODE / GENERAL FAILURE
+      const msg =
+        err.response?.data?.message || err.message || "Invalid 2FA code";
+
+      toast.error(msg);
+      setError(msg);
     }
   };
 
