@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { Download, ExternalLink, MessageCircleOff, MessageCircleReply, Package } from "lucide-react";
+import {
+  Download,
+  ExternalLink,
+  MessageCircleOff,
+  MessageCircleReply,
+  Package,
+} from "lucide-react";
 import { api } from "../api/axios";
 
 export default function Deliveries() {
@@ -36,81 +42,90 @@ export default function Deliveries() {
         <table className="w-full text-left">
           <thead>
             <tr className="text-gray-400 border-b border-gray-700">
-              <th className="py-3 text-sm font-medium">Seller</th>
-              <th className="py-3 text-sm font-medium">Buyers Email</th>
-              <th className="py-3 text-sm font-medium">Product</th>
-              <th className="py-3 text-sm font-medium">Delivered</th>
-              <th className="py-3 text-sm font-medium">Landing Page</th>
-              <th className="py-3 text-sm font-medium">Download</th>
-              <th className="py-3 text-sm font-medium">Thank You</th>
+              <th className="py-3 text-sm font-medium w-44 min-w-44">Seller</th>
+              <th className="py-3 text-sm font-medium w-56 min-w-56">
+                Buyers Email
+              </th>
+              <th className="py-3 text-sm font-medium w-52 min-w-52">
+                Product
+              </th>
+              <th className="py-3 text-sm font-medium w-44 min-w-44">
+                Delivered
+              </th>
+              <th className="py-3 text-sm font-medium w-20 min-w-20 text-center">
+                Landing
+              </th>
+              <th className="py-3 text-sm font-medium w-28 min-w-28 text-center">
+                Download
+              </th>
+              <th className="py-3 text-sm font-medium w-24 min-w-24 text-center">
+                Thank You
+              </th>
             </tr>
           </thead>
 
           <tbody>
-  {deliveries.map((d) => (
-    <tr
-      key={d.id}
-      className="border-b border-gray-800 hover:bg-gray-800/40 transition"
-    >
-      <td className="py-3 text-white">{d.buyer_name}</td>
+            {deliveries.map((d) => (
+              <tr
+                key={d.id}
+                className="border-b border-gray-800 hover:bg-gray-800/40 transition"
+              >
+                <td className="py-3 text-white w-44 min-w-44 truncate">
+                  {d.buyer_name}
+                </td>
 
-      <td className="py-3 text-gray-300 break-all">{d.buyer_email}</td>
+                <td className="py-3 text-gray-300 w-56 min-w-56 break-all">
+                  {d.buyer_email}
+                </td>
 
-      <td className="py-3 text-gray-300 break-all">{d.product_name}</td>
+                <td className="py-3 text-gray-300 w-52 min-w-52 truncate">
+                  {d.product_name}
+                </td>
 
-      <td className="py-3 text-gray-300">
-        {new Date(d.delivered_at).toLocaleString()}
-      </td>
+                <td className="py-3 text-gray-300 w-44 min-w-44 whitespace-nowrap">
+                  {new Date(d.delivered_at).toLocaleString()}
+                </td>
 
-      {/* Landing Page (correct position now) */}
-      <td className="py-3">
-        {d.landing_url ? (
-          <a
-            href={d.landing_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-teal-400 hover:text-teal-300 transition underline"
-          >
-            <ExternalLink size={16} />
-          </a>
-        ) : (
-          <span className="text-gray-500">None</span>
-        )}
-      </td>
+                <td className="py-3 w-20 min-w-20 text-center">
+                  {d.landing_url ? (
+                    <a
+                      href={d.landing_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-teal-400 hover:text-teal-300 transition inline-flex justify-center"
+                    >
+                      <ExternalLink size={18} />
+                    </a>
+                  ) : (
+                    <span className="text-gray-500">None</span>
+                  )}
+                </td>
 
-      {/* Download */}
-      <td className="py-3">
-        {d.download_url ? (
-          <a
-            href={d.download_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-teal-400 hover:text-teal-300 transition flex items-center gap-1"
-          >
-            <Download size={16} />
-          </a>
-        ) : (
-          <span className="text-gray-500">None</span>
-        )}
-      </td>
+                <td className="py-3 text-center w-28 min-w-28">
+                  {d.download_url ? (
+                    <a
+                      href={d.download_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-teal-400 hover:text-teal-300 transition flex justify-center"
+                    >
+                      <Download size={16} />
+                    </a>
+                  ) : (
+                    <span className="text-gray-500">None</span>
+                  )}
+                </td>
 
-      {/* Thank You Status */}
-      <td className="py-3">
-        {d.thank_you_sent ? (
-          <span className="px-2 py-1 text-xs text-teal-400 rounded-md">
-            <MessageCircleReply size={16} />
-          </span>
-        ) : (
-          <span className="px-2 py-1 text-xs text-red-400 rounded-md">
-            <MessageCircleOff size={16} />
-            
-          </span>
-        )}
-      </td>
-    </tr>
-  ))}
-</tbody>
-
+                <td className="py-3 text-center w-24 min-w-24">
+                  {d.thank_you_sent ? (
+                    <MessageCircleReply className="text-teal-400 w-5 h-5 inline-block" />
+                  ) : (
+                    <MessageCircleOff className="text-red-400 w-5 h-5 inline-block" />
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
 
@@ -121,8 +136,8 @@ export default function Deliveries() {
             key={d.id}
             className="bg-gray-800/70 border border-gray-700 rounded-lg p-4 space-y-2"
           >
-            <div className="flex justify-between">
-              <span className="text-gray-400 text-sm">Seller</span>
+            <div>
+              <span className="text-gray-400 text-sm block">Seller</span>
               <span className="text-white">{d.buyer_name}</span>
             </div>
 
@@ -151,7 +166,7 @@ export default function Deliveries() {
                   rel="noopener noreferrer"
                   className="text-teal-400 underline"
                 >
-                  {d.landing_url}
+                  <ExternalLink size={18} />
                 </a>
               ) : (
                 <span className="text-gray-500">None</span>
@@ -168,7 +183,7 @@ export default function Deliveries() {
                   className="text-teal-400 hover:text-teal-300 flex items-center gap-1"
                 >
                   <Download size={16} />
-                  Download
+                
                 </a>
               ) : (
                 <span className="text-gray-500">None</span>
@@ -178,14 +193,10 @@ export default function Deliveries() {
             <div>
               <span className="text-gray-400 text-sm block">Thank You</span>
               {d.thank_you_sent ? (
-                <span className="px-2 py-1 text-xs bg-green-500/20 text-green-400 rounded-md">
-                  Sent
-                </span>
-              ) : (
-                <span className="px-2 py-1 text-xs bg-red-500/20 text-red-400 rounded-md">
-                  Not Sent
-                </span>
-              )}
+                    <MessageCircleReply className="text-teal-400 w-5 h-5 inline-block" />
+                  ) : (
+                    <MessageCircleOff className="text-red-400 w-5 h-5 inline-block" />
+                  )}
             </div>
           </div>
         ))}

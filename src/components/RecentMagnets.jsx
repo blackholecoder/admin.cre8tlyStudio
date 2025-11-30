@@ -4,6 +4,7 @@ import {
   ExternalLink,
   ChevronLeft,
   ChevronRight,
+  Check,
 } from "lucide-react";
 import { api } from "../api/axios";
 
@@ -70,21 +71,24 @@ export default function RecentMagnets() {
                       {m.title || "Untitled"}
                     </p>
                     <p className="text-gray-400 text-sm">
-                      {new Date(m.created_at).toLocaleString()}
+                      {new Date(m.created_at_prompt).toLocaleString()}
                     </p>
                     <p className="text-gray-400 text-sm">
                       {m.user_name || "Unknown"} ({m.user_email || ""})
                     </p>
 
                     <span
-                      className={`inline-block mt-2 px-2 py-1 text-xs rounded ${
+                      className={`inline-flex items-center gap-1 mt-2 px-2 py-1 text-xs rounded ${
                         m.status === "completed"
-                          ? "bg-green-600/30 text-green-300"
+                          ? " text-teal-400"
                           : m.status === "pending"
-                          ? "bg-yellow-600/30 text-yellow-300"
+                          ? "bg-yellow/90 text-yellow/70"
                           : "bg-gray-600/30 text-gray-300"
                       }`}
                     >
+                      {m.status === "completed" && (
+                        <Check className="w-3 h-3 text-teal-400" />
+                      )}
                       {m.status}
                     </span>
                   </div>
