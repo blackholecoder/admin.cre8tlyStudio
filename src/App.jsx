@@ -21,6 +21,7 @@ import AdminTopicPosts from "./sections/AdminTopicPosts";
 import AdminCommunityTopics from "./sections/AdminCommunityTopics";
 import AdminCreatePostModal from "./sections/AdminCreatePostModal";
 import Deliveries from "./sections/Deliveries";
+import ReferralEmployeePage from "./sections/ReferralEmployeePage";
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem("accessToken");
@@ -153,6 +154,14 @@ export default function App() {
                         element={
                           <ProtectedRoute allowedRoles={["superadmin"]}>
                             <Deliveries />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                         path="/employee-referrals"
+                        element={
+                          <ProtectedRoute allowedRoles={["superadmin"]}>
+                            <ReferralEmployeePage />
                           </ProtectedRoute>
                         }
                       />

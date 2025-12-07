@@ -14,6 +14,7 @@ import {
 } from "chart.js";
 import { Activity } from "lucide-react";
 import { api } from "../api/axios";
+import VisitorsCityMap from "../components/VisitorsCityMap";
 
 ChartJS.register(
   CategoryScale,
@@ -233,6 +234,8 @@ export default function WebsiteAnalytics() {
           </table>
         </div>
       </div>
+      <VisitorsCityMap visitors={visitorsByLocation} />
+
     </div>
   );
 }

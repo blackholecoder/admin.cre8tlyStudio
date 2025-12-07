@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../api/axios";
 import { User, Mail, Calendar, Trash2 } from "lucide-react";
 import { toast } from "react-toastify";
+import ReferralModal from "../components/ReferralModal";
 
 export default function Users() {
   const [users, setUsers] = useState([]);
@@ -11,14 +12,13 @@ export default function Users() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalUsers, setTotalUsers] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [showReferralModal, setShowReferralModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const handleGiveFreeSlots = async (userId, email) => {
     setLoadingUserId(userId);
     try {
-      await api.post(
-        "/admin/give-free-magnets",
-        { userId, count: 1 },
-      );
+      await api.post("/admin/give-free-magnets", { userId, count: 1 });
       toast.success(`Gave 1 free slot to ${email}`);
     } catch (err) {
       toast.error("Failed to add free slots");
@@ -30,10 +30,7 @@ export default function Users() {
   const handleGiveFreeBookSlots = async (userId, email) => {
     setLoadingUserId(userId);
     try {
-      await api.post(
-        "/admin/give-free-books",
-        { userId, count: 1 },
-      );
+      await api.post("/admin/give-free-books", { userId, count: 1 });
       toast.success(`Gave 1 free book slot to ${email}`);
     } catch (err) {
       toast.error("Failed to add book slots");
@@ -51,10 +48,10 @@ export default function Users() {
     try {
       setLoading(true);
 
-      const res = await api.post(
-        "/admin/create-user-with-slots",
-        { ...form, slots: 5 },
-      );
+      const res = await api.post("/admin/create-user-with-slots", {
+        ...form,
+        slots: 5,
+      });
 
       toast.success(res.data.message || "User created successfully");
 
@@ -82,7 +79,6 @@ export default function Users() {
             onClick={async () => {
               toast.dismiss();
               try {
-
                 await api.delete(`/admin/users/users/${userId}`);
 
                 setUsers((prev) => prev.filter((u) => u.id !== userId));
@@ -121,7 +117,6 @@ export default function Users() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-
         const res = await api.get(`/admin/users?page=${page}&limit=20`);
 
         setUsers(res.data.users);
@@ -272,6 +267,15 @@ export default function Users() {
                       {loadingUserId === u.id ? "Processing..." : "Books"}
                     </button>
                     <button
+                      onClick={() => {
+                        setSelectedUser(u);
+                        setShowReferralModal(true);
+                      }}
+                      className="bg-emerald-600 hover:bg-emerald-500 text-black text-xs font-semibold px-3 py-1 rounded-lg shadow-md transition-all duration-200"
+                    >
+                      Referral
+                    </button>
+                    <button
                       onClick={() => handleDeleteUser(u.id)}
                       className="p-2 bg-gray-800 hover:bg-red-600 text-red-400 hover:text-white rounded-lg transition-all duration-200"
                       title="Delete User"
@@ -387,6 +391,12 @@ export default function Users() {
           </div>
         )}
       </div>
+      {showReferralModal && selectedUser && (
+        <ReferralModal
+          user={selectedUser}
+          onClose={() => setShowReferralModal(false)}
+        />
+      )}
     </div>
   );
 }

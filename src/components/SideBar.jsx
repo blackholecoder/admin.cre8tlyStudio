@@ -12,6 +12,7 @@ import {
   MessageSquare,
   PlusCircle,
   Package,
+  Crown,
 } from "lucide-react";
 import { headerLogo } from "../assets";
 import { api } from "../api/axios";
@@ -44,6 +45,13 @@ const adminNav = [
     icon: <PlusCircle size={20} />,
     superOnly: true,
   },
+  {
+    name: "Employee Referrals",
+    to: "/employee-referrals",
+    icon: <Crown size={20} />,
+    superOnly: true, // only superadmins can see it, matches your route
+  },
+  
 ];
 
 export default function Sidebar() {
